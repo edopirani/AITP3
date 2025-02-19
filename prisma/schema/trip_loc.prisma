@@ -1,0 +1,35 @@
+// ------------------------------------------
+// TRIP Locations
+// ------------------------------------------
+
+
+model TripLocation {
+  id         String   @id @default(uuid()) @db.Uuid
+  tripId     String   @db.Uuid
+  locationId String   @db.Uuid
+
+  trip       Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  location   Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+}
+
+model ItineraryItem {
+  id         String   @id @default(uuid()) @db.Uuid
+  tripId     String   @db.Uuid
+  locationId String?  @db.Uuid  
+  activity   String?  
+  startTime  DateTime?
+  endTime    DateTime?
+
+  trip       Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  location   Location? @relation(fields: [locationId], references: [id], onDelete: SetNull)
+}
+
+
+model TripBase {
+  id         String   @id @default(uuid()) @db.Uuid
+  tripId     String   @db.Uuid
+  locationId String   @db.Uuid
+
+  trip       Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  location   Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+}

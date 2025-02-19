@@ -1,0 +1,51 @@
+// ------------------------------------------
+// SPECIFIC PREFERENCE OPTIONS (quantitative)
+// Each has a unique relation name back to Profile
+// ------------------------------------------
+model FitnessOption {
+  id    String @id @default(uuid()) @db.Uuid
+  name  String @unique // e.g. "Sedentary", "Moderately Active", "Very Active"
+  value Int    @unique // e.g. 1, 2, 3
+
+  profiles Profile[] @relation("FitnessRef")
+}
+
+model PaceOption {
+  id    String @id @default(uuid()) @db.Uuid
+  name  String @unique
+  value Int    @unique
+
+  profiles Profile[] @relation("PaceRef")
+}
+
+model SoloTravelerOption {
+  id    String @id @default(uuid()) @db.Uuid
+  name  String @unique
+  value Int    @unique
+
+  profiles Profile[] @relation("SoloRef")
+}
+
+model ScheduleOption {
+  id    String @id @default(uuid()) @db.Uuid
+  name  String @unique
+  value Int    @unique
+
+  profiles Profile[] @relation("ScheduleRef")
+}
+
+model ComfortOption {
+  id    String @id @default(uuid()) @db.Uuid
+  name  String @unique
+  value Int    @unique
+
+  profiles Profile[] @relation("ComfortRef")
+}
+
+model NightlifeOption {
+  id    String @id @default(uuid()) @db.Uuid
+  name  String @unique
+  value Int    @unique
+
+  profiles Profile[] @relation("NightlifeRef")
+}

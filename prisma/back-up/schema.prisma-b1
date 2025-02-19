@@ -1,0 +1,112 @@
+
+// npx prisma generate
+// npx prisma migrate dev --name update-profile-schema
+// npx prisma studio
+
+// npx prisma migrate dev
+
+// npx prisma migrate reset        
+// npx prisma db push --force-reset
+
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ------------------------------------------
+// USERS & PROFILES
+// ------------------------------------------
+
+model User {
+  id        String   @id @default(uuid()) @db.Uuid
+  email     String   @unique
+  username  String   @unique
+  password  String   // Hashed password
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  profiles  Profile[]  // One user can have multiple profiles
+  trips     Trip[]     // One user can create multiple trips
+}
+
+model Profile {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String   @db.Uuid
+  name       String   
+  profileType String  // "Person" or "Group"
+  ageRange   String?  // Example: "18-25", "26-35", "36-50", "50+"
+  gender     String?  
+  relationshipStatus String?  // "Single" or "In a Relationship"
+  fitnessLevel Int    @default(2)  // Scale 1 to 3 (default: Balanced)
+  preferredPace Int   @default(2)  // Scale 1 to 3 (default: Balanced)
+  soloTraveler Int    @default(2)  // Scale 1 to 3 (default: Balanced)
+  schedulePreference Int @default(2)  // Scale 1 to 3 (default: Balanced)
+  comfortOrAdventure Int @default(2)  // Scale 1 to 3 (default: Balanced)
+  nightlifeInterest Int  @default(2)  // Scale 1 to 3 (default: Some Interest)
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  languages  ProfileLanguage[]
+  movingPreferences ProfileMovingPreference[]  // Select all by default
+  stayingPreferences ProfileStayingPreference[]  // Select all by default
+  interests  Interest[]  // Default to empty (no interests selected)
+}
+
+model ProfileLanguage {
+  id         String  @id @default(uuid()) @db.Uuid
+  profileId  String  @db.Uuid
+  language   String  // Example: "English", "Spanish", "Japanese"
+  proficiency Int    @default(2)  // Scale 1 to 3 (default: Conversational)
+
+  profile    Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+}
+
+model ProfileMovingPreference {
+  id         String  @id @default(uuid()) @db.Uuid
+  profileId  String  @db.Uuid
+  type       String  // "Public Transport", "Car Rental", "Scooter Rental", "Walking", "Cycling"
+
+  profile    Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+}
+
+model ProfileStayingPreference {
+  id         String  @id @default(uuid()) @db.Uuid
+  profileId  String  @db.Uuid
+  type       String  // "Hotels", "Hostels", "Villas", "Airbnbs"
+
+  profile    Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+}
+
+model Interest {
+  id        String  @id @default(uuid()) @db.Uuid
+  profileId String  @db.Uuid
+  name      String  // Example: "Surfing", "Cooking", "Hiking"
+  category  String  // Example: "Sports", "Food", "Culture", "TBD"
+
+  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+}
+
+// ------------------------------------------
+// TRIPS
+// ------------------------------------------
+
+model Trip {
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String   @db.Uuid
+  user        User     @relation(fields: [userId], references: [id])
+
+  // E.g. "Thailand Adventure", "Japan Family Trip"
+  name        String?
+
+  // Approx or confirmed travel dates
+  startDate   DateTime?
+  endDate     DateTime?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

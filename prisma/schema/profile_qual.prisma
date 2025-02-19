@@ -1,0 +1,30 @@
+// ------------------------------------------
+// PROFILE LOOKUP TABLES (qualitative)
+// ------------------------------------------
+model ProfileType {
+  id   String @id @default(uuid()) @db.Uuid
+  name String @unique // Invidual, group
+
+  profiles Profile[]
+}
+
+model AgeRange {
+  id   String @id @default(uuid()) @db.Uuid
+  name String @unique
+
+  profiles Profile[]
+}
+
+model Gender {
+  id   String @id @default(uuid()) @db.Uuid
+  name String @unique
+
+  profiles Profile[]
+}
+
+model RelationshipStatus {
+  id   String @id @default(uuid()) @db.Uuid
+  name String @unique
+
+  profiles Profile[]
+}

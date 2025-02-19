@@ -1,0 +1,85 @@
+// ------------------------------------------
+// LANGUAGES (Normalized)
+// ------------------------------------------
+model Language {
+  id   String @id @default(uuid()) @db.Uuid
+  name String @unique
+
+  profileLanguages ProfileLanguage[]
+}
+
+model ProfileLanguage {
+  id          String @id @default(uuid()) @db.Uuid
+  profileId   String @db.Uuid
+  languageId  String @db.Uuid
+  proficiency Int    @default(2) // 1=Basic, 2=Conversational, 3=Fluent
+
+  profile  Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  language Language @relation(fields: [languageId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, languageId])
+}
+
+// ------------------------------------------
+// MOVING PREFERENCES (Normalized)
+// ------------------------------------------
+model MovingPreference {
+  id   String @id @default(uuid()) @db.Uuid
+  type String @unique
+
+  profileMovingPreferences ProfileMovingPreference[]
+}
+
+model ProfileMovingPreference {
+  id          String @id @default(uuid()) @db.Uuid
+  profileId   String @db.Uuid
+  movingPrefId String @db.Uuid
+
+  profile          Profile          @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  movingPreference MovingPreference @relation(fields: [movingPrefId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, movingPrefId])
+}
+
+// ------------------------------------------
+// STAYING PREFERENCES (Normalized)
+// ------------------------------------------
+model StayingPreference {
+  id   String @id @default(uuid()) @db.Uuid
+  type String @unique
+
+  profileStayingPreferences ProfileStayingPreference[]
+}
+
+model ProfileStayingPreference {
+  id           String @id @default(uuid()) @db.Uuid
+  profileId    String @db.Uuid
+  stayingPrefId String @db.Uuid
+
+  profile           Profile           @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  stayingPreference StayingPreference @relation(fields: [stayingPrefId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, stayingPrefId])
+}
+
+// ------------------------------------------
+// INTERESTS (Normalized)
+// ------------------------------------------
+model Interest {
+  id        String @id @default(uuid()) @db.Uuid
+  name      String @unique
+  category  String? // e.g. "Sports", "Food", etc.
+
+  profileInterests ProfileInterest[]
+}
+
+model ProfileInterest {
+  id         String @id @default(uuid()) @db.Uuid
+  profileId  String @db.Uuid
+  interestId String @db.Uuid
+
+  profile  Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  interest Interest @relation(fields: [interestId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, interestId])
+}

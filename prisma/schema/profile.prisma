@@ -1,0 +1,44 @@
+// ------------------------------------------
+// PROFILES (Fully Normalized)
+// ------------------------------------------
+model Profile {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  name      String
+
+  // Normalized references
+  profileTypeId        String? @db.Uuid
+  ageRangeId           String? @db.Uuid
+  genderId             String? @db.Uuid
+  relationshipStatusId String? @db.Uuid
+
+  // Each preference is a foreign key referencing a separate Option model
+  fitnessPreferenceId      String? @db.Uuid
+  pacePreferenceId         String? @db.Uuid
+  soloTravelerPreferenceId String? @db.Uuid
+  schedulePreferenceId     String? @db.Uuid
+  comfortPreferenceId      String? @db.Uuid
+  nightlifePreferenceId    String? @db.Uuid
+
+  // Relations to lookup tables (qualitative)
+  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  profileType        ProfileType?        @relation(fields: [profileTypeId], references: [id], onDelete: SetNull)
+  ageRange           AgeRange?           @relation(fields: [ageRangeId], references: [id], onDelete: SetNull)
+  gender             Gender?             @relation(fields: [genderId], references: [id], onDelete: SetNull)
+  relationshipStatus RelationshipStatus? @relation(fields: [relationshipStatusId], references: [id], onDelete: SetNull)
+
+  // Relations to Option models (each uses a unique @relation name) (quantitative)
+  fitnessPreference      FitnessOption?      @relation("FitnessRef", fields: [fitnessPreferenceId], references: [id], onDelete: SetNull)
+  pacePreference         PaceOption?         @relation("PaceRef", fields: [pacePreferenceId], references: [id], onDelete: SetNull)
+  soloTravelerPreference SoloTravelerOption? @relation("SoloRef", fields: [soloTravelerPreferenceId], references: [id], onDelete: SetNull)
+  schedulePreference     ScheduleOption?     @relation("ScheduleRef", fields: [schedulePreferenceId], references: [id], onDelete: SetNull)
+  comfortPreference      ComfortOption?      @relation("ComfortRef", fields: [comfortPreferenceId], references: [id], onDelete: SetNull)
+  nightlifePreference    NightlifeOption?    @relation("NightlifeRef", fields: [nightlifePreferenceId], references: [id], onDelete: SetNull)
+
+  // Other relations (many to one)
+  languages         ProfileLanguage[]
+  movingPreferences ProfileMovingPreference[]
+  stayingPreferences ProfileStayingPreference[]
+  interests         ProfileInterest[]
+}
+
