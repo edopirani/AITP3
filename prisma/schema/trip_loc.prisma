@@ -2,34 +2,51 @@
 // TRIP Locations
 // ------------------------------------------
 
-
 model TripLocation {
-  id         String   @id @default(uuid()) @db.Uuid
-  tripId     String   @db.Uuid
-  locationId String   @db.Uuid
+  id         String @id @default(uuid()) @db.Uuid
+  tripId     String @db.Uuid
+  locationId String @db.Uuid
 
-  trip       Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
-  location   Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  trip     Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  location Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
 }
 
 model ItineraryItem {
-  id         String   @id @default(uuid()) @db.Uuid
-  tripId     String   @db.Uuid
-  locationId String?  @db.Uuid  
-  activity   String?  
-  startTime  DateTime?
-  endTime    DateTime?
+  id          String  @id @default(uuid()) @db.Uuid
+  tripId      String  @db.Uuid
+  locationId  String @db.Uuid
 
-  trip       Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
-  location   Location? @relation(fields: [locationId], references: [id], onDelete: SetNull)
+  trip        Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  location    Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+
+  dayNumber   Int     // Which day of the trip does this belong to?
+  order       Int     // Order of this location within the same day
+  startTime   DateTime?   // Optional start time
+  endTime     DateTime?   // Optional end time
+
+  activities  ItineraryActivity[] // Multiple activities can happen at this location
 }
 
-
 model TripBase {
-  id         String   @id @default(uuid()) @db.Uuid
-  tripId     String   @db.Uuid
-  locationId String   @db.Uuid
+  id         String @id @default(uuid()) @db.Uuid
+  tripId     String @db.Uuid
+  locationId String @db.Uuid
 
-  trip       Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
-  location   Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  trip     Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  location Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+}
+
+model ItineraryActivity {
+  id              String  @id @default(uuid()) @db.Uuid
+  itineraryItemId String  @db.Uuid
+  itineraryItem   ItineraryItem @relation(fields: [itineraryItemId], references: [id], onDelete: Cascade)
+
+  name            String  // Activity Name
+  description     String? // Activity Description
+  category        String  // E.g., "Adventure", "Food", "Culture"
+
+  duration        Int     // Estimated Duration in minutes
+  startTime       DateTime?   // Optional start time
+  endTime         DateTime?   // Computed based on startTime + duration (optional)
+  isBreak         Boolean @default(false) // Whether this is a planned break/free time
 }

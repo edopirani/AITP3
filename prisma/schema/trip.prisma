@@ -3,18 +3,83 @@
 // ------------------------------------------
 
 model Trip {
-  id          String   @id @default(uuid()) @db.Uuid
-  userId      String   @db.Uuid
-  user        User     @relation(fields: [userId], references: [id])
+  id               String   @id @default(uuid()) @db.Uuid
+  userId           String   @db.Uuid
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  name        String?
-  startDate   DateTime?
-  endDate     DateTime?
+  startDate        DateTime?
+  endDate          DateTime?
+  flexibleDates    Boolean @default(false)
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  typeId           String   @db.Uuid
+  type             TripType @relation("TripTypeRefs", fields: [typeId], references: [id], onDelete: Cascade)
 
-  locations   TripLocation[]
-  itinerary   ItineraryItem[]
-  bases       TripBase[]
+  budgetId         String   @db.Uuid
+  budget           BudgetOption @relation("BudgetRefs", fields: [budgetId], references: [id], onDelete: Cascade)
+
+  basePreferenceId String   @db.Uuid
+  basePreference   BasePreferenceOption @relation("BasePreferenceRefs", fields: [basePreferenceId], references: [id], onDelete: Cascade)
+
+  // Many-to-Many Relation: One trip can have multiple objectives
+  purposes         TripPurposeRelation[]
+
+  // Custom Objective (if provided by user)
+  customPurpose    String? 
+
+  tripProfiles     TripProfile[]  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  locations TripLocation[]
+  itinerary ItineraryItem[]
+  bases     TripBase[]
+}
+
+
+// Stores predefined trip objectives
+model TripPurpose {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String   @unique // e.g. "Adventure", "Relaxation", "Honeymoon"
+  trips     TripPurposeRelation[]
+}
+
+// Many-to-Many Join Table for Trip <-> TripPurpose
+model TripPurposeRelation {
+  tripId     String  @db.Uuid
+  purposeId  String  @db.Uuid
+  trip       Trip    @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  purpose    TripPurpose @relation(fields: [purposeId], references: [id], onDelete: Cascade)
+
+  @@id([tripId, purposeId]) // Composite primary key
+}
+
+
+model TripType {
+  id    String @id @default(uuid()) @db.Uuid
+  name  String @unique // e.g. "Couple", "Family", "Friends", "Solo", "Business"
+  trips Trip[] @relation("TripTypeRefs")
+}
+
+model BudgetOption {
+  id    String @id @default(uuid()) @db.Uuid
+  value Int    @unique // 1, 2, or 3
+  label String // "Budget", "Mid-Range", "Luxury"
+  trips Trip[] @relation("BudgetRefs")
+}
+
+model BasePreferenceOption {
+  id    String @id @default(uuid()) @db.Uuid
+  name  String @unique // "Single Base" or "Multi Base"
+  trips Trip[] @relation("BasePreferenceRefs")
+}
+
+model TripProfile {
+  tripId    String  @db.Uuid
+  profileId String  @db.Uuid
+  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  trip      Trip    @relation(fields: [tripId], references: [id], onDelete: Cascade)
+
+  partySize Int?
+
+  @@id([tripId, profileId]) // Composite key
 }

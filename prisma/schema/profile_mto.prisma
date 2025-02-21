@@ -31,8 +31,8 @@ model MovingPreference {
 }
 
 model ProfileMovingPreference {
-  id          String @id @default(uuid()) @db.Uuid
-  profileId   String @db.Uuid
+  id           String @id @default(uuid()) @db.Uuid
+  profileId    String @db.Uuid
   movingPrefId String @db.Uuid
 
   profile          Profile          @relation(fields: [profileId], references: [id], onDelete: Cascade)
@@ -52,8 +52,8 @@ model StayingPreference {
 }
 
 model ProfileStayingPreference {
-  id           String @id @default(uuid()) @db.Uuid
-  profileId    String @db.Uuid
+  id            String @id @default(uuid()) @db.Uuid
+  profileId     String @db.Uuid
   stayingPrefId String @db.Uuid
 
   profile           Profile           @relation(fields: [profileId], references: [id], onDelete: Cascade)
@@ -66,9 +66,9 @@ model ProfileStayingPreference {
 // INTERESTS (Normalized)
 // ------------------------------------------
 model Interest {
-  id        String @id @default(uuid()) @db.Uuid
-  name      String @unique
-  category  String? // e.g. "Sports", "Food", etc.
+  id       String  @id @default(uuid()) @db.Uuid
+  name     String  @unique
+  category String? // e.g. "Sports", "Food", etc.
 
   profileInterests ProfileInterest[]
 }
@@ -78,7 +78,7 @@ model ProfileInterest {
   profileId  String @db.Uuid
   interestId String @db.Uuid
 
-  profile  Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  profile  Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
   interest Interest @relation(fields: [interestId], references: [id], onDelete: Cascade)
 
   @@unique([profileId, interestId])

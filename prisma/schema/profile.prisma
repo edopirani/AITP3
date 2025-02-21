@@ -2,9 +2,9 @@
 // PROFILES (Fully Normalized)
 // ------------------------------------------
 model Profile {
-  id        String   @id @default(uuid()) @db.Uuid
-  userId    String   @db.Uuid
-  name      String
+  id     String @id @default(uuid()) @db.Uuid
+  userId String @db.Uuid
+  name   String
 
   // Normalized references
   profileTypeId        String? @db.Uuid
@@ -19,6 +19,8 @@ model Profile {
   schedulePreferenceId     String? @db.Uuid
   comfortPreferenceId      String? @db.Uuid
   nightlifePreferenceId    String? @db.Uuid
+  tourismPreferenceId    String? @db.Uuid
+
 
   // Relations to lookup tables (qualitative)
   user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -34,11 +36,14 @@ model Profile {
   schedulePreference     ScheduleOption?     @relation("ScheduleRef", fields: [schedulePreferenceId], references: [id], onDelete: SetNull)
   comfortPreference      ComfortOption?      @relation("ComfortRef", fields: [comfortPreferenceId], references: [id], onDelete: SetNull)
   nightlifePreference    NightlifeOption?    @relation("NightlifeRef", fields: [nightlifePreferenceId], references: [id], onDelete: SetNull)
+  tourismPreference    TourismOption?    @relation("TourismRef", fields: [tourismPreferenceId], references: [id], onDelete: SetNull)
+
+
 
   // Other relations (many to one)
-  languages         ProfileLanguage[]
-  movingPreferences ProfileMovingPreference[]
+  languages          ProfileLanguage[]
+  movingPreferences  ProfileMovingPreference[]
   stayingPreferences ProfileStayingPreference[]
-  interests         ProfileInterest[]
+  interests          ProfileInterest[]
+  TripProfile        TripProfile[]
 }
-

@@ -49,3 +49,11 @@ model NightlifeOption {
 
   profiles Profile[] @relation("NightlifeRef")
 }
+
+model TourismOption {
+  id    String @id @default(uuid()) @db.Uuid
+  name  String @unique
+  value Int    @unique
+
+  profiles Profile[] @relation("TourismRef")
+}

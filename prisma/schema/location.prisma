@@ -3,31 +3,30 @@
 // ------------------------------------------
 
 model LocationCategory {
-  id         String  @id @default(uuid()) @db.Uuid
-  name       String  @unique // "Country", "Region", "City", etc.
-  level      Int     // Our predefined hierarchy level
-  googleType String  @unique // Google API equivalent (e.g., "locality", "administrative_area_level_1")
+  id         String @id @default(uuid()) @db.Uuid
+  name       String @unique // "Country", "Region", "City", etc.
+  level      Int // Our predefined hierarchy level
+  googleType String @unique // Google API equivalent (e.g., "locality", "administrative_area_level_1")
 
-  locations  Location[]
+  locations Location[]
 }
 
 model Location {
-  id           String   @id @default(uuid()) @db.Uuid
-  name         String   
-  categoryId   String   @db.Uuid  // Our Custom Level Mapping
-  googleType   String   // "locality", "administrative_area_level_1", etc.
-  parentId     String?  @db.Uuid
-  latitude     Float?   
-  longitude    Float?   
-  googlePlaceId String? 
+  id            String  @id @default(uuid()) @db.Uuid
+  name          String
+  categoryId    String  @db.Uuid // Our Custom Level Mapping
+  googleType    String // "locality", "administrative_area_level_1", etc.
+  parentId      String? @db.Uuid
+  latitude      Float?
+  longitude     Float?
+  googlePlaceId String?
 
   // Relationships
-  category    LocationCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  parent      Location? @relation("LocationParentChild", fields: [parentId], references: [id], onDelete: SetNull)
-  children    Location[] @relation("LocationParentChild")
+  category LocationCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  parent   Location?        @relation("LocationParentChild", fields: [parentId], references: [id], onDelete: SetNull)
+  children Location[]       @relation("LocationParentChild")
 
-  trips           TripLocation[]
-  itineraryItems  ItineraryItem[]
-  bases           TripBase[]
+  trips          TripLocation[]
+  itineraryItems ItineraryItem[]
+  bases          TripBase[]
 }
-

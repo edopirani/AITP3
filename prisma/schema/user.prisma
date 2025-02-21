@@ -9,6 +9,6 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  profiles  Profile[]
-  trips     Trip[]
+  profiles Profile[]
+  trips    Trip[]
 }
