@@ -17,136 +17,63 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "No trip data found" }, { status: 404 });
         }
 
-        // Select the first trip (you can modify this to handle multiple trips)
+        // Select the first trip (modify if handling multiple trips)
         const trip = tripData[0];
 
         function calculateTripDuration(start, end) {
-          const startDate = new Date(start);
-          const endDate = new Date(end);
-          const timeDiff = endDate.getTime() - startDate.getTime();
-          return Math.ceil(timeDiff / (1000 * 60 * 60 * 24)); // Convert ms to days
-      }
+            const startDate = new Date(start);
+            const endDate = new Date(end);
+            const timeDiff = endDate.getTime() - startDate.getTime();
+            return Math.ceil(timeDiff / (1000 * 60 * 60 * 24)); // Convert ms to days
+        }
 
         // Construct a structured prompt for Gemini
         const prompt = `
-            **Trip Details**
-            - Trip Name: ${trip.trip_name}
-            - Trip Type: ${trip.trip_type}
-            - Trip Budget: ${trip.trip_budget}
-            - Preferred Stay Pattern: ${trip.preferred_stay_pattern}
-            - Trip Purpose: ${trip.trip_purpose}
-            - Custom Trip Purpose: ${trip.custom_trip_purpose}
-            - Trip Locations: ${trip.trip_locations}
-            - Start Date: ${trip.startDate}
-            - End Date: ${trip.endDate}
-            - Trip Duration: ${calculateTripDuration(trip.startDate, trip.endDate)} days
+        **Trip Details**
+        - Trip Name: ${trip.trip_name}
+        - Trip Type: ${trip.trip_type}
+        - Trip Budget: ${trip.trip_budget}
+        - Preferred Stay Pattern: ${trip.preferred_stay_pattern}
+        - Trip Purpose: ${trip.trip_purpose}
+        - Custom Trip Purpose: ${trip.custom_trip_purpose}
+        - Trip Locations: ${trip.trip_locations}
+        - Start Date: ${trip.startDate}
+        - End Date: ${trip.endDate}
+        - Trip Duration: ${calculateTripDuration(trip.startDate, trip.endDate)} days
 
-            **Profiles in this Trip:**
-            ${trip.profiles.map((p) => `
-                - Name: ${p.profile_name}
-                - Party Size: ${p.party_size}
-                - Age: ${p.age_range}
-                - Gender: ${p.gender}
-                - Relationship Status: ${p.relationship_status}
-                - Fitness Level: ${p.fitness_level}
-                - Nightlife Preference: ${p.nightlife_preference}
-                - Tourism Preference: ${p.tourism_preference}
-                - Pace Preference: ${p.pace_preference}
-                - Solo Travel Preference: ${p.solo_travel_preference}
-                - Schedule Preference: ${p.schedule_preference}
-                - Comfort Preference: ${p.comfort_preference}
-                - Interests: ${p.interests}
-                - Moving Preferences: ${p.moving_preferences}
-                - Staying Preferences: ${p.staying_preferences}
-                - Languages: ${p.languages}
-            `).join("\n")}
-
-        **Context:**
-
-        You are an expert travel planner. Your task is to help a user structure the perfect itinerary by selecting the best destinations based on their input.
-
-        The following structured data represents a traveler's preferences, trip details, and associated locations. Some fields may need clarification for AI interpretation. Below is a breakdown of key fields and their meaning:
-
-        **Key Definitions for AI Understanding:**
-
-        ✅ **Preferred Accommodation Style:**  
-        - **Single Base** → The traveler prefers staying in one location and taking day trips before returning to the same accommodation each night.  
-        - **Multi Base** → The traveler enjoys moving between different locations and staying in multiple accommodations throughout the trip.  
-
-        ✅ **Trip Purpose:**  
-        - A list of key motivations for the trip (e.g., Cultural Exploration, Adventure, Relaxation).  
-        - If a custom purpose is defined, it represents a unique intent from the traveler.  
-
-        ✅ **Budget Level:**  
-        - **Budget** → Prefers low-cost options, including hostels, budget airlines, and affordable food.  
-        - **Mid-Range** → Comfortable accommodations, a mix of cost-conscious and experience-driven choices.  
-        - **Luxury** → Prioritizes high-end experiences, fine dining, and premium accommodations.  
-
-        ✅ **Travel Pace:**  
-        - **Slow & Relaxed** → Enjoys taking time in each destination, prioritizing comfort over covering many places.  
-        - **Balanced** → A mix of relaxation and exploration.  
-        - **Fast-Paced** → Prefers maximizing activities and covering more ground in a shorter time.  
-
-        ✅ **Solo Travel Preference:**  
-        - **Alone** → Enjoys exploring independently.  
-        - **Company** → Prefers being around others while traveling.  
-
-        ✅ **Moving Preferences:**  
-        - Includes transport methods preferred by the traveler, such as public transport, car rental, or walking.  
-
-        ✅ **Staying Preferences:**  
-        - Defines the types of accommodation the traveler prefers, such as hotels, villas, or hostels.  
-
-        ✅ **Interests:**  
-        - Specific activities or themes that the traveler enjoys, such as hiking, fine dining, museums.  
-
-        ✅ **Languages Spoken (with proficiency level):**  
-        - Indicates the languages the traveler speaks and their fluency level (1 = Basic, 3 = Fluent).  
+        **Profiles in this Trip:**
+        ${trip.profiles.map((p) => `
+            - Name: ${p.profile_name}
+            - Party Size: ${p.party_size}
+            - Age: ${p.age_range}
+            - Gender: ${p.gender}
+            - Relationship Status: ${p.relationship_status}
+            - Fitness Level: ${p.fitness_level}
+            - Nightlife Preference: ${p.nightlife_preference}
+            - Tourism Preference: ${p.tourism_preference}
+            - Pace Preference: ${p.pace_preference}
+            - Solo Travel Preference: ${p.solo_travel_preference}
+            - Schedule Preference: ${p.schedule_preference}
+            - Comfort Preference: ${p.comfort_preference}
+            - Interests: ${p.interests}
+            - Moving Preferences: ${p.moving_preferences}
+            - Staying Preferences: ${p.staying_preferences}
+            - Languages: ${p.languages}
+        `).join("\n")}
 
         ---
 
-        ### **📝 Task: Selecting the Best Destinations for the Itinerary**  
-        Your goal is to **help the traveler define their itinerary** by recommending the best destinations based on the information provided.
+        **🔹 Task: Define the Ideal Itinerary**
+        - If the user selected a broad country (e.g., "Italy"), narrow it down to **best cities** based on trip duration, preferences, and interests.
+        - If the user selected a specific city (e.g., "Rome"), suggest **surrounding destinations** that fit within the time frame.
+        - Provide a **table format** summarizing the recommended destinations, their vibe, and must-do activities.
 
-        1️⃣ **If the user selected a broad country/region (e.g., "Italy")**  
-          - Narrow it down by recommending **the best cities/regions** to visit based on trip duration, travel preferences, and interests.  
-          - Balance **culture, adventure, relaxation, and unique experiences** to create a well-rounded trip.  
-          - Avoid overpacking the schedule – **only recommend what fits within the available time**.  
-
-        2️⃣ **If the user selected a specific city (e.g., "Rome")**  
-          - Suggest **nearby destinations** that make sense for a short trip (e.g., **Naples, Florence, Amalfi for a Rome-based trip**).  
-          - Only include extra locations **if travel time allows** (avoid unrealistic day trips).  
-
-        3️⃣ **Present the Information in a Clear Table Format**  
-          - Include the following columns:  
-            - **Destination Name**  
-            - **Brief Description** (Vibe & Unique Features)  
-            - **Popular Activities & Highlights**  
-
-        4️⃣ **Ensure Suggestions Match User Preferences**  
-          - If they prefer **relaxation**, avoid fast-paced cities.  
-          - If they prefer **adventure**, suggest locations with outdoor activities.  
-          - If they are food lovers, emphasize **culinary experiences**.  
-
-        ---
-
-        ### **🔹 Example Output Format**  
-
-        📍 **User Selection:** Italy  
-        📆 **Trip Duration:** 10 Days  
-        💡 **Suggested Destinations & Overview:**  
-
-        | Destination     | Vibe & Highlights                           | Must-Do Activities                          |
-        |---------------|------------------------------------------|------------------------------------------|
-        | **Rome** 🇮🇹  | Historic, lively, full of ancient ruins  | Colosseum, Vatican, Trastevere food tour  |
-        | **Florence** 🎨  | Art & Renaissance, charming squares  | Uffizi Gallery, Michelangelo’s David, wine tour  |
-        | **Venice** 🚤  | Romantic, canals, unique architecture  | Gondola ride, St. Mark’s Basilica, Murano glass-making  |
-        | **Amalfi Coast** 🌊  | Scenic coastal views, colorful towns  | Positano, boat tour, Limoncello tasting  |
-        | **Tuscany** 🍷  | Rolling vineyards, countryside charm  | Chianti wine tasting, hot air balloon ride, medieval towns  |
-
+        **📌 Response Format:**
+        - Return **JSON only**.
+        - Ensure JSON is well-structured for easy parsing.
         `;
 
-        console.log("📝 Gemini Prompt Sent:", prompt);  // Log to debug
+        console.log("📝 Gemini Prompt Sent:", prompt);  // Debugging log
 
         // Send request to Google Gemini API
         const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
@@ -161,23 +88,59 @@ export async function POST(req: NextRequest) {
                     {
                         parts: [{ text: prompt }],
                     },
-                ],
+                ]
             }),
         });
 
         // Parse Gemini API response
         const geminiData = await response.json();
 
-        console.log("🔍 Gemini Response:", geminiData);  // Log API response
+        // Check if Gemini response is valid
+        if (!response.ok) {
+            console.error("❌ Gemini API Error:", geminiData);
+            return NextResponse.json({ error: geminiData.error?.message || "Failed to generate itinerary" }, { status: response.status });
+        }
 
-        // 🔍 Log Gemini's Response in a Readable Format
-        console.log("🔍 Gemini Response:", JSON.stringify(geminiData, null, 2));  // Log API response
+        // Extract structured itinerary from response if available
+        const itinerary = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text || "No itinerary generated";
 
-        // Return trip data + Gemini response
-        return NextResponse.json({ trip_data: tripData, gemini_response: geminiData });
+        console.log("📜 Raw Gemini Response:", itinerary); // Debugging log
 
-    } catch (error) {
-        console.error("❌ Error in POST request:", error);
+        try {
+          // Remove potential markdown formatting (```json ... ```)
+          let cleanedItinerary = itinerary.replace(/```[a-z]*\n?/g, "").trim();
+      
+          // Remove any lines that contain comments (e.g., "// some text")
+          cleanedItinerary = cleanedItinerary.replace(/\/\/.*$/gm, "").trim();
+      
+          console.log("🧹 Cleaned Gemini Response Before Parsing:", cleanedItinerary); // Debugging log
+      
+          try {
+              // Attempt to parse response as JSON
+              const parsedItinerary = JSON.parse(cleanedItinerary);
+      
+              // Log formatted response
+              console.log("✅ Gemini Parsed Response:", JSON.stringify(parsedItinerary, null, 2));
+      
+              // Return trip data + Gemini structured response
+              return NextResponse.json({
+                  trip_data: tripData,
+                  gemini_response: parsedItinerary, // Returning structured JSON
+              });
+      
+          } catch (jsonError) {
+              console.error("❌ Failed to parse Gemini response (after cleanup):", cleanedItinerary);
+              console.error("❌ JSON Parsing Error:", jsonError);
+              return NextResponse.json({ trip_data: tripData, gemini_raw_response: cleanedItinerary });
+          }
+      
+      } catch (processingError) {
+          console.error("❌ Error processing itinerary:", processingError);
+          return NextResponse.json({ error: "Failed to process itinerary" }, { status: 500 });
+      }
+
+    } catch (globalError) {
+        console.error("❌ Error generating itinerary:", globalError);
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
     }
 }
