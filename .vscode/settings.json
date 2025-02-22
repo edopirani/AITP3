@@ -1,3 +1,6 @@
 {
-  "prismaERDPreviewer.preferredTheme": "dark"
+  "prismaERDPreviewer.preferredTheme": "dark",
+  "workbench.tree.indent": 20,
+  "workbench.tree.renderIndentGuides": "always",
+  "typescript.inlayHints.functionLikeReturnTypes.enabled": false
 }

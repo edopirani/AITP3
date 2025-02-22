@@ -1,0 +1,53 @@
+// ------------------------------------------
+// ALL LOCATIONS
+// ------------------------------------------
+
+
+model Location {
+  id            String  @id @default(uuid()) @db.Uuid
+  name          String
+  shortName     String? // Shorter name (e.g., "Colosseum")
+  categoryId    String  @db.Uuid // ✅ Still links to LocationCategory
+  googleType    String // "locality", "administrative_area_level_1", etc.
+  // latitude      Float?
+  // longitude     Float?
+  googlePlaceId String  @unique // ✅ Ensure this is unique!
+
+  // ✅ Relations
+
+  adminLevel1   String?  // ✅ Stores administrative_area_level_1 (Region/State)
+  adminLevel2   String?  // ✅ Stores administrative_area_level_2 (Province/Metro)
+  adminLevel3   String?  // ✅ Stores administrative_area_level_3 (Smaller divisions)
+  country       String?  // ✅ Stores the country name (e.g., "Italy")
+
+  category LocationCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  trips          TripLocation[]
+  itineraryItems ItineraryItem[]
+  bases          TripBase[]
+}
+
+
+
+model LocationCategory {
+  id    String @id @default(uuid()) @db.Uuid
+  name  String @unique
+  level Int
+
+  // ✅ Back-relation to Location
+  locations Location[]
+
+  // ✅ Relation for multiple Google Place Types
+  googleMappings LocationCategoryMapping[]
+}
+
+model LocationCategoryMapping {
+  id              String @id @default(uuid()) @db.Uuid
+  googleType      String @unique // "locality", "administrative_area_level_1", etc.
+  
+  // ✅ Each Google Type links to ONE category
+  categoryId      String @db.Uuid
+  category        LocationCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+}
+
+

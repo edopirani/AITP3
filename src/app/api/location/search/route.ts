@@ -33,6 +33,7 @@ export async function GET(req: NextRequest) {
                     name: place.description, // Full name
                     googlePlaceId: place.place_id,
                     googleType,
+                    address_components: detailsData.result?.address_components || [],
                     structured_formatting: place.structured_formatting || {
                         main_text: place.description.split(",")[0],
                         secondary_text: place.description.split(",").slice(1).join(", "),
