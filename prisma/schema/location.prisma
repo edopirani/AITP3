@@ -27,6 +27,7 @@ model LocationCategoryMapping {
 model Location {
   id            String  @id @default(uuid()) @db.Uuid
   name          String
+  shortName     String? // Shorter name (e.g., "Colosseum")
   categoryId    String  @db.Uuid // ✅ Still links to LocationCategory
   googleType    String // "locality", "administrative_area_level_1", etc.
   parentId      String? @db.Uuid

@@ -6,16 +6,27 @@ const prisma = new PrismaClient();
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
-        const { name, googlePlaceId, googleType } = body;
+
+        // Log the received request body to debug issues
+        console.log("Received request body:", body);
+
+        if (!body || typeof body !== "object") {
+            console.error("Invalid body received:", body);
+            return NextResponse.json({ error: "Invalid request payload" }, { status: 400 });
+        }
+
+        const { name, googlePlaceId, googleType, structured_formatting } = body;
 
         if (!name || !googlePlaceId || !googleType) {
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
         }
 
-        // Log received data for debugging
-        console.log("Received data:", { name, googlePlaceId, googleType });
+        // Extract shortName correctly
+        const shortName = structured_formatting?.main_text || name.split(",")[0];
 
-        // Ensure Prisma Client is correctly initialized
+        console.log("Extracted shortName:", shortName);
+
+        // Validate Prisma Client
         if (!prisma.locationCategoryMapping) {
             throw new Error("Prisma Client not recognizing 'locationCategoryMapping'");
         }
@@ -31,15 +42,15 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: `No category found for type: ${googleType}` }, { status: 400 });
         }
 
-        // Log the found category
         console.log("Found category:", categoryMapping.category);
 
-        // Save or update the location with the correct categoryId
+        // Save or update the location
         const location = await prisma.location.upsert({
             where: { googlePlaceId },
-            update: { name },  // Ensuring update works correctly
+            update: { name, shortName },
             create: { 
-                name, 
+                name,
+                shortName,  
                 googlePlaceId, 
                 googleType, 
                 categoryId: categoryMapping.category.id
