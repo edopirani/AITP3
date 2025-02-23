@@ -1,31 +1,45 @@
-import React from "react";
+import React, { useState } from "react";
 
-export default function ItineraryTable({ itinerary }) {
+export default function ItineraryTable({ itinerary, selectedLocations, setSelectedLocations }) {
     if (!itinerary || !Array.isArray(itinerary)) {
         return <p>No valid itinerary data.</p>;
     }
 
+    const handleCheckboxChange = (name) => {
+        setSelectedLocations((prev) => {
+            if (prev.includes(name)) {
+                return prev.filter((loc) => loc !== name); // Remove if unchecked
+            } else {
+                return [...prev, name]; // Add if checked
+            }
+        });
+    };
+
     return (
-        <table border={1}>
+        <table border={1} style={{ margin: "20px auto", width: "80%", textAlign: "left" }}>
             <thead>
                 <tr>
-                    <th>Day</th>
-                    <th>Date</th>
-                    <th>Location</th>
-                    <th>Vibe</th>
-                    <th>Activities</th>
+                    <th>Select</th>
+                    <th>Destination</th>
+                    <th>Description</th>
+                    <th>Popular Activities</th>
                 </tr>
             </thead>
             <tbody>
-                {itinerary.map((day) => (
-                    <tr key={day.day}>
-                        <td>{day.day}</td>
-                        <td>{day.date}</td>
-                        <td>{day.location}</td>
-                        <td>{day.vibe}</td>
+                {itinerary.map((place) => (
+                    <tr key={place.name}>
+                        <td>
+                            <input
+                                type="checkbox"
+                                checked={selectedLocations.includes(place.name)}
+                                onChange={() => handleCheckboxChange(place.name)}
+                            />
+                        </td>
+                        <td><strong>{place.name}</strong></td>
+                        <td>{place.description}</td>
                         <td>
                             <ul>
-                                {day.activities.map((activity, index) => (
+                                {place.activities.map((activity, index) => (
                                     <li key={index}>{activity}</li>
                                 ))}
                             </ul>

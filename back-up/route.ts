@@ -17,51 +17,51 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "No trip data found" }, { status: 404 });
         }
 
-        // Select the first trip (you can modify this to handle multiple trips)
+        // Select the first trip (modify if handling multiple trips)
         const trip = tripData[0];
 
         function calculateTripDuration(start, end) {
-          const startDate = new Date(start);
-          const endDate = new Date(end);
-          const timeDiff = endDate.getTime() - startDate.getTime();
-          return Math.ceil(timeDiff / (1000 * 60 * 60 * 24)); // Convert ms to days
-      }
+            const startDate = new Date(start);
+            const endDate = new Date(end);
+            const timeDiff = endDate.getTime() - startDate.getTime();
+            return Math.ceil(timeDiff / (1000 * 60 * 60 * 24)); // Convert ms to days
+        }
 
         // Construct a structured prompt for Gemini
         const prompt = `
-            **Trip Details**
-            - Trip Name: ${trip.trip_name}
-            - Trip Type: ${trip.trip_type}
-            - Trip Budget: ${trip.trip_budget}
-            - Preferred Stay Pattern: ${trip.preferred_stay_pattern}
-            - Trip Purpose: ${trip.trip_purpose}
-            - Custom Trip Purpose: ${trip.custom_trip_purpose}
-            - Trip Locations: ${trip.trip_locations}
-            - Start Date: ${trip.startDate}
-            - End Date: ${trip.endDate}
-            - Trip Duration: ${calculateTripDuration(trip.startDate, trip.endDate)} days
+        **Trip Details**
+        - Trip Name: ${trip.trip_name}
+        - Trip Type: ${trip.trip_type}
+        - Trip Budget: ${trip.trip_budget}
+        - Preferred Stay Pattern: ${trip.preferred_stay_pattern}
+        - Trip Purpose: ${trip.trip_purpose}
+        - Custom Trip Purpose: ${trip.custom_trip_purpose}
+        - Trip Locations: ${trip.trip_locations}
+        - Start Date: ${trip.startDate}
+        - End Date: ${trip.endDate}
+        - Trip Duration: ${calculateTripDuration(trip.startDate, trip.endDate)} days
 
-            **Profiles in this Trip:**
-            ${trip.profiles.map((p) => `
-                - Name: ${p.profile_name}
-                - Party Size: ${p.party_size}
-                - Age: ${p.age_range}
-                - Gender: ${p.gender}
-                - Relationship Status: ${p.relationship_status}
-                - Fitness Level: ${p.fitness_level}
-                - Nightlife Preference: ${p.nightlife_preference}
-                - Tourism Preference: ${p.tourism_preference}
-                - Pace Preference: ${p.pace_preference}
-                - Solo Travel Preference: ${p.solo_travel_preference}
-                - Schedule Preference: ${p.schedule_preference}
-                - Comfort Preference: ${p.comfort_preference}
-                - Interests: ${p.interests}
-                - Moving Preferences: ${p.moving_preferences}
-                - Staying Preferences: ${p.staying_preferences}
-                - Languages: ${p.languages}
-            `).join("\n")}
+        **Profiles in this Trip:**
+        ${trip.profiles.map((p) => `
+            - Name: ${p.profile_name}
+            - Party Size: ${p.party_size}
+            - Age: ${p.age_range}
+            - Gender: ${p.gender}
+            - Relationship Status: ${p.relationship_status}
+            - Fitness Level: ${p.fitness_level}
+            - Nightlife Preference: ${p.nightlife_preference}
+            - Tourism Preference: ${p.tourism_preference}
+            - Pace Preference: ${p.pace_preference}
+            - Solo Travel Preference: ${p.solo_travel_preference}
+            - Schedule Preference: ${p.schedule_preference}
+            - Comfort Preference: ${p.comfort_preference}
+            - Interests: ${p.interests}
+            - Moving Preferences: ${p.moving_preferences}
+            - Staying Preferences: ${p.staying_preferences}
+            - Languages: ${p.languages}
+        `).join("\n")}
 
-        **Context:**
+         **Context:**
 
         You are an expert travel planner. Your task is to help a user structure the perfect itinerary by selecting the best destinations based on their input.
 
@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
 
         **Key Definitions for AI Understanding:**
 
-        ✅ **Preferred Accommodation Style:**  
+        ✅ **Preferred Stay Pattern (You need to try to accomodate the preference by providing the appropriate group of options, at this stage we are still scoping the places to visit, so you can avoid deciding the bases for them):**  
         - **Single Base** → The traveler prefers staying in one location and taking day trips before returning to the same accommodation each night.  
         - **Multi Base** → The traveler enjoys moving between different locations and staying in multiple accommodations throughout the trip.  
 
@@ -105,7 +105,7 @@ export async function POST(req: NextRequest) {
 
         ---
 
-        ### **📝 Task: Selecting the Best Destinations for the Itinerary**  
+        ### **📝 Task: Scope the Best Destinations for the Itinerary**  
         Your goal is to **help the traveler define their itinerary** by recommending the best destinations based on the information provided.
 
         1️⃣ **If the user selected a broad country/region (e.g., "Italy")**  
@@ -174,50 +174,74 @@ export async function POST(req: NextRequest) {
 
         `;
 
-        console.log("📝 Gemini Prompt Sent:", prompt);  // Log to debug
+        console.log("📝 Gemini Prompt Sent:", prompt);  // Debugging log
 
         // Send request to Google Gemini API
         const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
         const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:generateContent?key=${GEMINI_API_KEY}`, {
-          method: "POST",
-          headers: {
-              "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-              contents: [
-                  {
-                      parts: [{ text: prompt }],
-                  },
-              ],
-              generationConfig: {
-                  response_mime_type: "application/json" // Forces JSON response
-              }
-          }),
-      });
-  
-      // Parse Gemini API response
-      const geminiData = await response.json();
-  
-      // Check if Gemini response is valid
-      if (!response.ok) {
-          console.error("❌ Gemini API Error:", geminiData);
-          return NextResponse.json({ error: geminiData.error?.message || "Failed to generate itinerary" }, { status: response.status });
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                contents: [
+                    {
+                        parts: [{ text: prompt }],
+                    },
+                ]
+            }),
+        });
+
+        // Parse Gemini API response
+        const geminiData = await response.json();
+
+        // Check if Gemini response is valid
+        if (!response.ok) {
+            console.error("❌ Gemini API Error:", geminiData);
+            return NextResponse.json({ error: geminiData.error?.message || "Failed to generate itinerary" }, { status: response.status });
+        }
+
+        // Extract structured itinerary from response if available
+        const itinerary = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text || "No itinerary generated";
+
+        console.log("📜 Raw Gemini Response:", itinerary); // Debugging log
+
+        try {
+          // Remove potential markdown formatting (```json ... ```)
+          let cleanedItinerary = itinerary.replace(/```[a-z]*\n?/g, "").trim();
+      
+          // Remove any lines that contain comments (e.g., "// some text")
+          cleanedItinerary = cleanedItinerary.replace(/\/\/.*$/gm, "").trim();
+      
+          console.log("🧹 Cleaned Gemini Response Before Parsing:", cleanedItinerary); // Debugging log
+      
+          try {
+              // Attempt to parse response as JSON
+              const parsedItinerary = JSON.parse(cleanedItinerary);
+      
+              // Log formatted response
+              console.log("✅ Gemini Parsed Response:", JSON.stringify(parsedItinerary, null, 2));
+      
+              // Return trip data + Gemini structured response
+              return NextResponse.json({
+                  trip_data: tripData,
+                  gemini_response: parsedItinerary, // Returning structured JSON
+              });
+      
+          } catch (jsonError) {
+              console.error("❌ Failed to parse Gemini response (after cleanup):", cleanedItinerary);
+              console.error("❌ JSON Parsing Error:", jsonError);
+              return NextResponse.json({ trip_data: tripData, gemini_raw_response: cleanedItinerary });
+          }
+      
+      } catch (processingError) {
+          console.error("❌ Error processing itinerary:", processingError);
+          return NextResponse.json({ error: "Failed to process itinerary" }, { status: 500 });
       }
-  
-      // 🔍 Log Gemini's Response in a Readable Format
-      console.log("🔍 Gemini Response:", JSON.stringify(geminiData, null, 2));
-  
-      // Extract structured itinerary from response if available
-      const itinerary = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text || "No itinerary generated";
-  
-      // Return trip data + Gemini response
-      return NextResponse.json({
-          trip_data: tripData,
-          gemini_response: itinerary,  // Returning formatted itinerary
-      });
-  
-  } catch (error) {
-      console.error("❌ Error in POST request:", error);
-      return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
-  }}
+
+    } catch (globalError) {
+        console.error("❌ Error generating itinerary:", globalError);
+        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    }
+}
