@@ -19,8 +19,8 @@ model ItineraryItem {
   trip        Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
   location    Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
 
-  dayNumber   Int     // Which day of the trip does this belong to?
-  order       Int     // Order of this location within the same day
+  dayNumber   Int?     // Which day of the trip does this belong to?
+  order       Int?     // Order of this location within the same day
   startTime   DateTime?   // Optional start time
   endTime     DateTime?   // Optional end time
 
