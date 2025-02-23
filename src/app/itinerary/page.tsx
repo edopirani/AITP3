@@ -6,7 +6,7 @@ import { useSubmitItinerary } from "@/hooks/useSubmitItinerary"; // ✅ Handles 
 import ItineraryTable from "@/app/components/ItineraryTable";
 import GenerateButton from "@/app/components/GenerateButton";
 import SaveButton from "@/app/components/SaveButton";
-import TripSummary from "@/app/components/TripSummary";
+import TripSummary from "@/app/components/tripsummary";
 
 export default function ItineraryPage() {
     const { itinerary, tripInfo, locationCount, summary, loading, error, fetchItinerary } = useFetchItinerary();
